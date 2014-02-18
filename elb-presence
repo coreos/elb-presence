@@ -1,0 +1,41 @@
+#!/usr/bin/python
+
+import argparse
+import os
+import signal
+import sys
+
+import boto.ec2.elb
+import requests
+
+parser = argparse.ArgumentParser(description='Register the local EC2 instance in an ELB')
+parser.add_argument('--lbname', metavar='<NAME>', default=os.environ.get('ELB_NAME'),
+                    help='Name of AWS ELB that should be used for registration')
+parser.add_argument('--region', metavar='<REGION>', default=os.environ.get('AWS_REGION'),
+                    help='AWS region in which the ELB resides')
+parser.add_argument('--access-key', metavar='<ACCESS>', default=os.environ.get('AWS_ACCESS_KEY'))
+parser.add_argument('--secret-key', metavar='<SECRET>', default=os.environ.get('AWS_SECRET_KEY'))
+args = parser.parse_args()
+
+conn = boto.ec2.elb.connect_to_region(args.region,
+                                      aws_access_key_id=args.access_key,
+                                      aws_secret_access_key=args.secret_key)
+
+instance = requests.get("http://169.254.169.254/latest/meta-data/instance-id").content
+
+print "Registering instance {} to ELB {}".format(instance, args.lbname)
+conn.register_instances(args.lbname, [instance])
+
+def deregister_func(lbname, instance):
+    def handler(*args, **kwargs):
+        print "Deregistering instance {} from ELB {}".format(instance, lbname)
+        conn.deregister_instances(lbname, [instance])
+        sys.exit(0)
+    return handler
+
+deregister = deregister_func(args.lbname, instance)
+signal.signal(signal.SIGTERM, deregister)
+signal.signal(signal.SIGINT, deregister)
+
+while True:
+    pass
