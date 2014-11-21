@@ -5,9 +5,9 @@ import os
 import signal
 import sys
 import time
+import urllib2
 
 import boto.ec2.elb
-import requests
 
 parser = argparse.ArgumentParser(description='Register the local EC2 instance in an ELB')
 parser.add_argument('--lbname', metavar='<NAME>', default=os.environ.get('ELB_NAME'),
@@ -22,7 +22,7 @@ conn = boto.ec2.elb.connect_to_region(args.region,
                                       aws_access_key_id=args.access_key,
                                       aws_secret_access_key=args.secret_key)
 
-instance = requests.get("http://169.254.169.254/latest/meta-data/instance-id").content
+instance = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
 
 print "Registering instance {} to ELB {}".format(instance, args.lbname)
 conn.register_instances(args.lbname, [instance])
