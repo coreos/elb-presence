@@ -20,6 +20,8 @@ docker run --rm --name example-presence -e AWS_ACCESS_KEY=AKIAIBC5MW3ONCW6J2XQ -
 * `AWS_REGION` ... The AWS region that your load balancer is located in
 * `ELB_NAME` ... The exact name of your load balancer
 
+You can omit the AWS_ACCESS_KEY and AWS_SECRET_KEY variables and fallback to an instance IAM role for authentication.
+
 ### Via Fleet
 
 Usually you'll want to manage the lifecycle of your presence service using
