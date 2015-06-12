@@ -18,7 +18,7 @@ parser.add_argument('--access-key', metavar='<ACCESS>', default=os.environ.get('
 parser.add_argument('--secret-key', metavar='<SECRET>', default=os.environ.get('AWS_SECRET_KEY'))
 args = parser.parse_args()
 
-if args.access_key and args.access_key:
+if args.access_key and args.secret_key:
     conn = boto.ec2.elb.connect_to_region(args.region,
                                           aws_access_key_id=args.access_key,
                                           aws_secret_access_key=args.secret_key)
